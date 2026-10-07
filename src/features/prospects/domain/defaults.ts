@@ -38,6 +38,7 @@ export const blankIntelligence: Intelligence = {
   },
 };
 export const blankDebrief: DebriefFields = {
+  notInterested: false,
   answered: false,
   decisionMakerReached: false,
   meaningfulConversation: false,
@@ -73,5 +74,9 @@ export function createProspect(
     intelligence: structuredClone(blankIntelligence),
     callPrep: null,
     calls: [],
+    outreachActivities: [],
+    lastOutreachAt: null,
+    nextFollowUpDate: null,
+    followUpReason: "",
   };
 }

@@ -1,3 +1,4 @@
+import type { OutreachActivity } from "./outreach";
 export const ICP_VALUES = [
   "Founder / Local Business",
   "Soccer Club / Academy",
@@ -76,6 +77,7 @@ export interface CallPrep {
   demoToShow: string;
 }
 export interface DebriefFields {
+  notInterested: boolean;
   answered: boolean;
   decisionMakerReached: boolean;
   meaningfulConversation: boolean;
@@ -109,8 +111,12 @@ export interface Prospect extends ProspectFields {
   intelligence: Intelligence;
   callPrep: CallPrep | null;
   calls: CallDebrief[];
+  outreachActivities: OutreachActivity[];
+  lastOutreachAt: string | null;
+  nextFollowUpDate: string | null;
+  followUpReason: string;
 }
 export interface Workspace {
-  version: 1;
+  version: 2;
   prospects: Prospect[];
 }

@@ -1,8 +1,10 @@
 # SEKAIROS REVENUE COMMAND
 
-An internal revenue execution system for Sekairos. The first working vertical slice is:
+An internal revenue execution system for Sekairos. The working prospect workflow is:
 
 **PROSPECT → INTELLIGENCE → OPPORTUNITY SCORE → REVENUE PRIORITY → CALL PREP → CALL DEBRIEF → NEXT ACTION**
+
+The outreach workflow continues with **CALL OUTCOME → OUTREACH PACK → COPY / PREPARE TO SEND → FOLLOW-UP → PIPELINE ACTION**.
 
 ## Develop
 
@@ -24,6 +26,10 @@ No environment variables or external services are required. `.env.example` docum
 - ICP-specific deterministic Call Prep: editable opener, reason, exactly five questions, objections, next step, claims to avoid, and demo guidance. Draft templates and saved customizations remain distinct.
 - Fast Call Debrief with requested outcomes, conversation context, follow-up date, operator action notes, immutable history, automatic status changes, and a recommended next action.
 - Persistent local workspace, including deleted records staying deleted and edits surviving refresh. Three clearly labeled fictional examples seed only a new workspace.
+- Nine editable outreach drafts with deterministic outcome-specific packs, recommended ICP offers, demo guidance, and CTAs. Open the send pack directly from detail or after a call.
+- Working browser copy with confirmation and editable drafts that survive refresh. Reset each draft to generated copy; closed/disqualified prospects suppress persuasive outreach.
+- Draft/Prepared/Sent activity, immutable sent history, Last Outreach At, appropriate Follow-Up status changes, and editable follow-up dates/reasons.
+- Command due/overdue follow-ups above score-ranked priorities, with actual local pipeline counts for priorities, follow-ups, demos, meetings, and proposals.
 - Responsive desktop/mobile navigation and recovery for missing prospect ids.
 
 ## Persistence
@@ -32,21 +38,22 @@ Records are stored in `localStorage` under `sekairos.revenue-command.v1`, scoped
 
 Writes complete before the UI reports success. Invalid saved data is left untouched and shows an error instead of being replaced. Storage access/quota failures show errors. Other tabs receive storage updates; simultaneous edits use last-write-wins semantics and are not a collaboration feature.
 
-Estimated opportunity values and fixture money signals are hypotheses in USD, not confirmed revenue. Example websites use the reserved `.example` domain. Recommendations do not send messages, make calls, create proposals, or schedule meetings.
+Estimated opportunity values and fixture money signals are hypotheses in USD, not confirmed revenue. Example websites use the reserved `.example` domain. Recommendations do not send messages, make calls, create proposals, or schedule meetings. Mark Sent records a manual send; demo outlines require the operator to add an actual asset/link. Existing version-one workspaces migrate to schema version two while retaining the original storage key and records.
 
 ## Routes
 
-| Route                          | Behavior                                                           |
-| ------------------------------ | ------------------------------------------------------------------ |
-| `/`                            | Redirect to Command                                                |
-| `/command`                     | Today's ranked revenue priorities                                  |
-| `/prospects`                   | Searchable/filterable list                                         |
-| `/prospects/new`               | Create prospect                                                    |
-| `/prospects/[id]`              | Contact detail, intelligence, score, next action, and call history |
-| `/prospects/[id]/edit`         | Edit prospect fields                                               |
-| `/prospects/[id]/call-prep`    | Editable deterministic ICP template                                |
-| `/prospects/[id]/debrief`      | Log a call and calculate the next action                           |
-| `/opportunities`, `/playbooks` | Retained planned workspaces, outside this slice                    |
+| Route                          | Behavior                                                             |
+| ------------------------------ | -------------------------------------------------------------------- |
+| `/`                            | Redirect to Command                                                  |
+| `/command`                     | Ranked priorities, overdue/due follow-ups, and pipeline counts       |
+| `/prospects`                   | Searchable/filterable list                                           |
+| `/prospects/new`               | Create prospect                                                      |
+| `/prospects/[id]`              | Detail, intelligence, next action, outreach activity, and follow-up  |
+| `/prospects/[id]/edit`         | Edit prospect fields                                                 |
+| `/prospects/[id]/call-prep`    | Editable deterministic ICP template                                  |
+| `/prospects/[id]/debrief`      | Log a call and calculate the next action                             |
+| `/prospects/[id]/outreach`     | Editable send packs, copy/reset, manual sent activity, and follow-up |
+| `/opportunities`, `/playbooks` | Retained planned workspaces, outside this slice                      |
 
 ## Validate
 
@@ -73,10 +80,10 @@ In the supplied cloud environment, use its Chromium installation:
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e
 ```
 
-This test-only variable is optional. Browser traces/screenshots are ignored local artifacts. Tests cover the complete requested workflow, score boundaries, persistence, filters, mobile navigation, delete confirmation, strong outcome precedence, corrupted data, and failed writes.
+This test-only variable is optional. Browser traces/screenshots are ignored local artifacts. Tests cover both complete workflows, actual clipboard contents, all nine channel edits/copies/resets, sent history, follow-up visibility, outcome packs, all ICP offers, score boundaries, migration, persistence, filters, mobile navigation, delete confirmation, disqualification, corrupted data, and failed clipboard/storage writes.
 
 ## Stack and conventions
 
-Next.js App Router, strict TypeScript, Tailwind CSS, shadcn/ui, lucide-react, and Zod runtime validation. System fonts remove remote font dependencies. Feature rules live in `src/features/prospects/domain`; browser I/O lives in `src/services`; routes remain thin.
+Next.js App Router, strict TypeScript, Tailwind CSS, shadcn/ui, lucide-react, and Zod runtime validation. System fonts remove remote font dependencies. Feature rules live in `src/features/prospects/domain` and `src/features/outreach/domain`; browser I/O lives in `src/services`; routes remain thin.
 
 Read [Product](docs/PRODUCT.md), [Architecture](docs/ARCHITECTURE.md), [Roadmap](docs/ROADMAP.md), and [Current sprint](docs/CURRENT_SPRINT.md). Follow [AGENTS.md](AGENTS.md). Development stays on `build/revenue-command-v1`; do not merge main without instruction.

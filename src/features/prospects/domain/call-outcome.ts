@@ -11,6 +11,8 @@ export function statusAfterCall(
   current: ProspectStatus,
   call: DebriefFields,
 ): ProspectStatus {
+  if (current === "Won") return "Won";
+  if (current === "Lost" || call.notInterested) return "Lost";
   if (call.proposalRequested) return "Proposal";
   if (call.meetingRequested) return "Meeting Requested";
   if (call.demoRequested) return "Demo Requested";
@@ -31,7 +33,7 @@ export function nextActionForCall(
   score: number,
   call?: DebriefFields,
 ): NextAction {
-  if (status === "Lost") return "Disqualify";
+  if (status === "Lost" || call?.notInterested) return "Disqualify";
   if (status === "Won") return "Nurture";
   if (call?.proposalRequested || status === "Proposal")
     return "Create Proposal";
@@ -48,11 +50,21 @@ export function nextActionForCall(
   return score >= 70 ? "Call Tomorrow" : "Nurture";
 }
 export function recommendedNextAction(prospect: Prospect): NextAction {
-  return nextActionForCall(
+  const callId = prospect.calls.at(-1)?.id ?? null;
+  const action = nextActionForCall(
     prospect.status,
     opportunityScore(prospect.intelligence.scores),
     prospect.calls.at(-1),
   );
+  const fulfilled = prospect.outreachActivities.some(
+    (a) =>
+      a.sourceCallId === callId &&
+      a.status === "Sent" &&
+      ((action === "Send Demo" && a.messageType === "Demo Email") ||
+        (action === "Send Email" &&
+          a.messageType === "Post-Call Follow-Up Email")),
+  );
+  return fulfilled ? "Call Tomorrow" : action;
 }
 export function applyDebrief(
   prospect: Prospect,
@@ -77,6 +89,12 @@ export function applyDebrief(
     status,
     updatedAt: now,
     calls: [...prospect.calls, call],
+    ...(fields.followUpRequired
+      ? {
+          nextFollowUpDate: fields.followUpDate,
+          followUpReason: fields.nextAction || "Follow up on the call outcome.",
+        }
+      : {}),
     intelligence: {
       ...prospect.intelligence,
       desiredOutcome:

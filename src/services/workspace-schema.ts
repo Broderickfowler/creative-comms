@@ -1,3 +1,4 @@
+import { MESSAGE_TYPES, OUTREACH_CHANNELS } from "@/types/outreach";
 import { z } from "zod";
 import {
   ICP_VALUES,
@@ -10,7 +11,7 @@ const boolean = z.boolean();
 const date = z
   .string()
   .refine((value) => !Number.isNaN(Date.parse(value)), "Invalid timestamp");
-const dateOnly = text.refine(
+export const dateOnly = text.refine(
   (value) =>
     value === "" ||
     (/^\d{4}-\d{2}-\d{2}$/.test(value) &&
@@ -69,6 +70,7 @@ export const callPrepSchema = z.object({
 });
 export const debriefFieldsSchema = z
   .object({
+    notInterested: boolean.default(false),
     answered: boolean,
     decisionMakerReached: boolean,
     meaningfulConversation: boolean,
@@ -93,6 +95,29 @@ export const debriefFieldsSchema = z
     message: "Choose a follow-up date",
     path: ["followUpDate"],
   });
+export const outreachMessageSchema = z.object({
+  messageType: z.enum(MESSAGE_TYPES),
+  channel: z.enum(OUTREACH_CHANNELS),
+  subject: text,
+  messageBody: text,
+});
+const outreachActivitySchema = outreachMessageSchema
+  .extend({
+    id: text.min(1),
+    prospectId: text.min(1),
+    createdAt: date,
+    sentAt: date.nullable(),
+    status: z.enum(["Draft", "Prepared", "Sent"]),
+    sourceCallId: text.nullable(),
+  })
+  .refine(
+    (a) => (a.status === "Sent" ? a.sentAt !== null : a.sentAt === null),
+    "Sent timestamp must match activity status",
+  )
+  .refine(
+    (a) => a.status === "Draft" || !!a.messageBody.trim(),
+    "Prepared or Sent message cannot be empty",
+  );
 const prospectSchema = prospectFieldsSchema.extend({
   id: text.min(1),
   createdAt: date,
@@ -100,6 +125,10 @@ const prospectSchema = prospectFieldsSchema.extend({
   isFictional: boolean,
   intelligence: intelligenceSchema,
   callPrep: callPrepSchema.nullable(),
+  outreachActivities: z.array(outreachActivitySchema).default([]),
+  lastOutreachAt: date.nullable().default(null),
+  nextFollowUpDate: dateOnly.nullable().default(null),
+  followUpReason: text.default(""),
   calls: z.array(
     debriefFieldsSchema.safeExtend({
       id: text.min(1),
@@ -108,13 +137,29 @@ const prospectSchema = prospectFieldsSchema.extend({
     }),
   ),
 });
+const checkedProspectSchema = prospectSchema.refine(
+  (p) =>
+    p.outreachActivities.every(
+      (a) =>
+        a.prospectId === p.id &&
+        (a.sourceCallId === null ||
+          p.calls.some((c) => c.id === a.sourceCallId)),
+    ) &&
+    new Set(p.outreachActivities.map((a) => a.id)).size ===
+      p.outreachActivities.length,
+  "Invalid outreach activity ownership or duplicate ids",
+);
 const workspaceSchema = z
-  .object({ version: z.literal(1), prospects: z.array(prospectSchema) })
+  .object({
+    version: z.union([z.literal(1), z.literal(2)]),
+    prospects: z.array(checkedProspectSchema),
+  })
   .refine(
     (value) =>
       new Set(value.prospects.map((p) => p.id)).size === value.prospects.length,
     "Duplicate prospect ids",
   );
 export function parseWorkspace(raw: string): Workspace {
-  return workspaceSchema.parse(JSON.parse(raw));
+  const parsed = workspaceSchema.parse(JSON.parse(raw));
+  return { ...parsed, version: 2 };
 }

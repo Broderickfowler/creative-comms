@@ -6,10 +6,11 @@ import { useProspects } from "@/features/prospects/use-prospects";
 import { WorkspaceGate } from "@/features/prospects/components/workspace-gate";
 import {
   rankProspects,
-  followUpDate,
+  followUpsDue,
+  pipelineCounts,
   localDate,
 } from "@/features/prospects/domain/priorities";
-import { opportunityScore } from "@/features/prospects/domain/scoring";
+import { FollowUpsDue } from "./components/follow-ups-due";
 import { PriorityCard } from "./components/priority-card";
 export function CommandPage() {
   const store = useProspects();
@@ -18,20 +19,18 @@ export function CommandPage() {
   );
   const priorities = rankProspects(open);
   const today = localDate();
+  const counts = pipelineCounts(store.prospects, today);
+  const due = followUpsDue(store.prospects, today);
   const metrics = [
-    { label: "Open prospects", value: open.length },
     {
-      label: "CALL NOW · 85+",
-      value: open.filter((p) => opportunityScore(p.intelligence.scores) >= 85)
-        .length,
+      label: "Today's Revenue Priorities",
+      value: counts.priorities,
+      key: "priorities",
     },
-    {
-      label: "Follow-up due or overdue",
-      value: open.filter((p) => {
-        const due = followUpDate(p);
-        return due !== null && due <= today;
-      }).length,
-    },
+    { label: "Follow-Ups Due", value: counts.followUps, key: "follow-ups" },
+    { label: "Demo Requests", value: counts.demos, key: "demos" },
+    { label: "Meeting Requests", value: counts.meetings, key: "meetings" },
+    { label: "Proposals", value: counts.proposals, key: "proposals" },
   ];
   return (
     <WorkspaceGate {...store}>
@@ -53,9 +52,13 @@ export function CommandPage() {
           </Link>
         </Button>
       </div>
-      <div className="mb-7 grid gap-3 sm:grid-cols-3">
+      <div className="mb-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {metrics.map((metric) => (
-          <div key={metric.label} className="rounded-xl border bg-white p-5">
+          <div
+            key={metric.label}
+            data-testid={`pipeline-${metric.key}`}
+            className="rounded-xl border bg-white p-5"
+          >
             <p className="text-xs text-muted-foreground">{metric.label}</p>
             <p className="mt-2 text-3xl font-semibold text-primary">
               {metric.value}
@@ -67,6 +70,8 @@ export function CommandPage() {
         Saved in this browser · Fictional examples are labeled · Recommendations
         do not send messages.
       </p>
+      <FollowUpsDue prospects={due} today={today} />
+      <h2 className="mb-4 text-lg font-semibold">Revenue priorities</h2>
       <div className="space-y-4">
         {priorities.map((p, index) => (
           <PriorityCard key={p.id} prospect={p} index={index} />

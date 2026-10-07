@@ -1,3 +1,6 @@
+import type { OutreachMessage } from "@/types/outreach";
+import { applyOutreach } from "@/features/outreach/domain/activity";
+import { dateOnly, outreachMessageSchema } from "./workspace-schema";
 import type {
   CallPrep,
   DebriefFields,
@@ -48,9 +51,9 @@ export function initializeStore() {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     const workspace: Workspace =
       raw === null
-        ? { version: 1, prospects: seedProspects() }
+        ? { version: 2, prospects: seedProspects() }
         : parseWorkspace(raw);
-    if (raw === null)
+    if (raw === null || JSON.parse(raw).version === 1)
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace));
     snapshot = { ready: true, prospects: workspace.prospects, error: null };
   } catch {
@@ -74,10 +77,10 @@ function change(transform: (prospects: Prospect[]) => Prospect[]) {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     const current =
       raw === null
-        ? { version: 1 as const, prospects: snapshot.prospects }
+        ? { version: 2 as const, prospects: snapshot.prospects }
         : parseWorkspace(raw);
     const next: Workspace = {
-      version: 1,
+      version: 2,
       prospects: transform(current.prospects),
     };
     parseWorkspace(JSON.stringify(next));
@@ -136,4 +139,48 @@ export function saveDebrief(id: string, value: DebriefFields) {
   update(id, (p) =>
     applyDebrief(p, valid, crypto.randomUUID(), new Date().toISOString()),
   );
+}
+
+export function saveOutreachDraft(
+  id: string,
+  message: OutreachMessage,
+  prepared = false,
+) {
+  const valid = outreachMessageSchema.parse(message);
+  if (prepared && !valid.messageBody.trim())
+    throw new Error("Add a message before copying.");
+  update(id, (p) =>
+    applyOutreach(
+      p,
+      valid,
+      prepared ? "Prepared" : "Draft",
+      crypto.randomUUID(),
+      new Date().toISOString(),
+    ),
+  );
+}
+export function markOutreachSent(id: string, message: OutreachMessage) {
+  const valid = outreachMessageSchema.parse(message);
+  if (!valid.messageBody.trim())
+    throw new Error("Add a message before marking it sent.");
+  update(id, (p) =>
+    applyOutreach(
+      p,
+      valid,
+      "Sent",
+      crypto.randomUUID(),
+      new Date().toISOString(),
+    ),
+  );
+}
+export function saveFollowUp(id: string, date: string, reason: string) {
+  const valid = dateOnly.parse(date);
+  if (valid && !reason.trim())
+    throw new Error("Add a reason for this follow-up.");
+  update(id, (p) => ({
+    ...p,
+    nextFollowUpDate: valid,
+    followUpReason: valid ? reason.trim() : "",
+    updatedAt: new Date().toISOString(),
+  }));
 }

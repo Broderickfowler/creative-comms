@@ -81,6 +81,9 @@ export function PriorityCard({
           </Link>
         </Button>
         <Button asChild variant="outline" size="sm">
+          <Link href={`/prospects/${p.id}/outreach`}>Open Send Pack</Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
           <Link href={`/prospects/${p.id}`}>
             Open prospect <ArrowUpRight className="size-3.5" />
           </Link>

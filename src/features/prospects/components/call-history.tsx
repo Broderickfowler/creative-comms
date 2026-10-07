@@ -1,5 +1,6 @@
 import type { CallDebrief } from "@/types/prospect";
 const flags = [
+  "notInterested",
   "answered",
   "decisionMakerReached",
   "meaningfulConversation",

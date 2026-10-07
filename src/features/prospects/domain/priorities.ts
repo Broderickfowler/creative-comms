@@ -16,6 +16,8 @@ const statusRank: Record<ProspectStatus, number> = {
   Lost: 12,
 };
 export function followUpDate(prospect: Prospect): string | null {
+  if (prospect.nextFollowUpDate !== null)
+    return prospect.nextFollowUpDate || null;
   const call = prospect.calls.at(-1);
   return call?.followUpRequired && call.followUpDate ? call.followUpDate : null;
 }
@@ -41,4 +43,38 @@ export function rankProspects(prospects: Prospect[]): Prospect[] {
       a.companyName.localeCompare(b.companyName) ||
       a.id.localeCompare(b.id),
   );
+}
+
+export function followUpsDue(
+  prospects: Prospect[],
+  today = localDate(),
+): Prospect[] {
+  return prospects
+    .filter(
+      (p) =>
+        p.status !== "Won" &&
+        p.status !== "Lost" &&
+        !!followUpDate(p) &&
+        followUpDate(p)! <= today,
+    )
+    .sort(
+      (a, b) =>
+        followUpDate(a)!.localeCompare(followUpDate(b)!) ||
+        opportunityScore(b.intelligence.scores) -
+          opportunityScore(a.intelligence.scores) ||
+        a.companyName.localeCompare(b.companyName),
+    );
+}
+export function pipelineCounts(prospects: Prospect[], today = localDate()) {
+  return {
+    priorities: prospects.filter(
+      (p) => p.status !== "Won" && p.status !== "Lost",
+    ).length,
+    followUps: followUpsDue(prospects, today).length,
+    demos: prospects.filter((p) => p.status === "Demo Requested").length,
+    meetings: prospects.filter(
+      (p) => p.status === "Meeting Requested" || p.status === "Meeting Booked",
+    ).length,
+    proposals: prospects.filter((p) => p.status === "Proposal").length,
+  };
 }

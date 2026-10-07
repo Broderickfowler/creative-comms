@@ -59,11 +59,33 @@ Command ranks open prospects by total descending, then the earliest required fol
 
 Call Prep uses editable ICP-specific templates without an AI API. Operators must verify context and avoid unsupported claims. Saving Call Prep keeps custom wording until it is edited or reset and saved.
 
-Requested call outcomes take precedence: Proposal Requested → Proposal, otherwise Meeting Requested → Meeting Requested, otherwise Demo Requested → Demo Requested. A meaningful conversation sets Contacted when no stronger requested outcome or existing stronger status applies; otherwise the existing status remains. Ordinary meaningful calls do not downgrade existing Demo Requested, Meeting Requested, Meeting Booked, Proposal, Won, or Lost statuses. Explicit requested outcomes take precedence over the current status.
+Requested call outcomes take precedence: Proposal Requested → Proposal, otherwise Meeting Requested → Meeting Requested, otherwise Demo Requested → Demo Requested. A meaningful conversation sets Contacted when no stronger requested outcome or existing stronger status applies; otherwise the existing status remains. Ordinary meaningful calls do not downgrade existing Demo Requested, Meeting Requested, Meeting Booked, Proposal, Won, or Lost statuses. Won and Lost remain closed even when a requested outcome is checked; reopening requires an explicit prospect status edit. Not interested / Disqualified takes precedence over requested outcomes and sets Lost.
 
 The next-action engine is deterministic: Lost → Disqualify; Won → Nurture (closed records do not enter Command); proposal request/status → Create Proposal; meeting request/status → Schedule Meeting; demo request/status → Send Demo; email request → Send Email; follow-up required or unanswered call → Call Tomorrow; otherwise a score of 70+ → Call Tomorrow and lower scores → Nurture. This is a recommendation, not an executed action. A chosen follow-up date remains visible alongside it; Call Tomorrow is the fixed recommendation label, not an automated reschedule of that date.
 
 Call Debrief preserves every entered field and appends immutable history. Nonempty Desired Outcome, Money Signal, Timing, and Primary Problem values update matching intelligence signals. Scores remain operator-assigned. Next Action in the form records the operator's own notes; the recommendation is computed separately. Follow-Up Date is required when Follow-Up Required is checked.
+
+### Outreach Command
+
+The second slice connects CALL OUTCOME → OUTREACH PACK → COPY / PREPARE TO SEND → FOLLOW-UP → PIPELINE ACTION. The operator can open a send pack directly after a debrief or from prospect detail, copy edited messages, and record a manual send.
+
+Nine editable deterministic drafts cover Initial Email, Post-Call Follow-Up Email, Demo Email, Follow-Up Email 1, Follow-Up Email 2, WhatsApp Message, LinkedIn DM, Instagram / Facebook DM, and Voicemail. Templates use recorded context, ask questions instead of asserting unknown facts, and follow VISION → FRICTION → BUSINESS IMPACT → CAPACITY. They earn the next conversation without financial promises, monitoring claims, fake familiarity, or an AI/automation pitch. Operator edits still require human review.
+
+Outcome precedence is proposal acknowledgment, scheduling response, Demo Send Pack, Information Send Pack, then relevant follow-up for a meaningful conversation. Without an outcome, use initial outreach. Closed Won/Lost prospects receive no persuasive drafts or copy/send actions. A new call starts a new draft context; earlier edits and sent history remain recorded.
+
+| ICP                      | Supported offers                                                                                                                    |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Founder / Local Business | Operational Intelligence Review; Capacity Sprint; Connected Lead System; CRM / Follow-Up System                                     |
+| Soccer Club / Academy    | Academy Operations Review; Player Enrollment System; Athletic Operations Capacity Sprint; Sekairos Athletics Command Center         |
+| College Athletics        | Athletics Technology & Capacity Audit; Athletic Operations Capacity Sprint; Athletics Command Center; Cross-System Operations Layer |
+
+The offer is a deterministic starting point based on ICP and recorded friction/opportunity keywords; its rationale states what still needs verification. The recommended demo is an outline or the saved Call Prep demo guidance. The operator must supply the actual demo asset/link before sending. Draft generation and copying do not create or deliver a demo.
+
+Editing creates/updates Draft activity. Successful browser copy records Prepared. Mark Sent records the operator's manual send, stamps Sent At and Last Outreach At, and moves ordinary open stages (including Demo Requested) to Follow-Up. Proposal and meeting stages remain intact; an acknowledgment does not book a meeting or create a proposal. Sent records remain immutable; editing a sent message creates a new draft. Repeated Mark Sent on identical content is idempotent.
+
+After the primary email is marked sent, the pack advances to follow-up copy. A fulfilled demo/information email recommendation becomes Call Tomorrow; this fixed label does not override a chosen follow-up date. Meeting/proposal recommendations remain actionable until the operator records the actual pipeline change.
+
+Next Follow-Up Date and Follow-Up Reason are editable. Mark Sent defaults an unscheduled follow-up to the next local calendar day and keeps an existing date/reason. Clearing the date explicitly removes the scheduled follow-up, including any older call-date fallback. Command shows due/overdue follow-ups above score-ranked priorities, oldest first, and counts open priorities, due follow-ups, Demo Requests, Meeting Requests (including Meeting Booked), and Proposals from the saved local records.
 
 ### Scope boundaries
 

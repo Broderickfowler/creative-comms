@@ -114,3 +114,89 @@ test("Deleting every example persists an empty workspace instead of reseeding", 
     0,
   );
 });
+
+test("Outreach drafts, preparation, sent activity and explicit follow-up survive store reloads", async () => {
+  const { saveOutreachDraft, markOutreachSent, saveFollowUp } =
+    await import("@/services/prospect-store");
+  const { resolveMessage } =
+    await import("@/features/outreach/domain/messages");
+  const storage = new MemoryStorage();
+  open(storage);
+  const id = "fictional-soccer";
+  saveDebrief(id, {
+    ...blankDebrief,
+    answered: true,
+    meaningfulConversation: true,
+    demoRequested: true,
+  });
+  const p = getSnapshot().prospects.find((p) => p.id === id)!;
+  const msg = {
+    ...resolveMessage(p, "Demo Email"),
+    messageBody: "Persistent operator copy",
+  };
+  saveOutreachDraft(id, msg);
+  open(storage);
+  assert.equal(
+    resolveMessage(
+      getSnapshot().prospects.find((p) => p.id === id)!,
+      "Demo Email",
+    ).messageBody,
+    msg.messageBody,
+  );
+  saveOutreachDraft(id, msg, true);
+  markOutreachSent(id, msg);
+  saveFollowUp(id, "2026-10-08", "Agree demo feedback");
+  open(storage);
+  const saved = getSnapshot().prospects.find((p) => p.id === id)!;
+  assert.equal(saved.status, "Follow-Up");
+  assert.ok(saved.lastOutreachAt);
+  assert.equal(saved.outreachActivities.length, 1);
+  assert.equal(saved.outreachActivities[0].status, "Sent");
+  assert.equal(saved.nextFollowUpDate, "2026-10-08");
+  assert.equal(saved.followUpReason, "Agree demo feedback");
+  saveFollowUp(id, "", "");
+  open(storage);
+  assert.equal(
+    getSnapshot().prospects.find((p) => p.id === id)!.nextFollowUpDate,
+    "",
+  );
+  assert.throws(() => saveFollowUp(id, "2026-02-30", "Bad date"));
+  assert.throws(() => saveFollowUp(id, "2026-10-09", ""), /reason/);
+  assert.throws(
+    () => markOutreachSent(id, { ...msg, messageBody: "" }),
+    /message/,
+  );
+});
+
+test("Legacy store migration persists version two and preserves the original when migration writes fail", () => {
+  const source = new MemoryStorage();
+  open(source);
+  const old = JSON.parse(source.getItem(STORAGE_KEY)!);
+  old.version = 1;
+  for (const p of old.prospects) {
+    delete p.outreachActivities;
+    delete p.lastOutreachAt;
+    delete p.nextFollowUpDate;
+    delete p.followUpReason;
+  }
+  const raw = JSON.stringify(old);
+  const storage = new MemoryStorage();
+  storage.setItem(STORAGE_KEY, raw);
+  open(storage);
+  assert.equal(JSON.parse(storage.getItem(STORAGE_KEY)!).version, 2);
+  assert.equal(getSnapshot().prospects.length, 3);
+  assert.equal(
+    getSnapshot().prospects[1].companyName,
+    old.prospects[1].companyName,
+  );
+  assert.deepEqual(
+    getSnapshot().prospects[1].intelligence,
+    old.prospects[1].intelligence,
+  );
+  const blocked = new MemoryStorage();
+  blocked.setItem(STORAGE_KEY, raw);
+  blocked.failWrites = true;
+  open(blocked);
+  assert.ok(getSnapshot().error);
+  assert.equal(blocked.getItem(STORAGE_KEY), raw);
+});

@@ -1,5 +1,6 @@
 export const outcomeFields = [
   { key: "answered", label: "Answered" },
+  { key: "notInterested", label: "Not interested / Disqualified" },
   { key: "decisionMakerReached", label: "Decision Maker Reached" },
   { key: "meaningfulConversation", label: "Meaningful Conversation" },
   { key: "emailRequested", label: "Email Requested" },

@@ -2,40 +2,40 @@
 
 ## Goal
 
-Build the first complete revenue vertical slice: PROSPECT → INTELLIGENCE → OPPORTUNITY SCORE → REVENUE PRIORITY → CALL PREP → CALL DEBRIEF → NEXT ACTION.
+Turn prospect intelligence and call outcomes into immediately usable outreach for Email, WhatsApp, LinkedIn, Instagram/Facebook DM, voicemail, and follow-up. The operator should be able to finish a call and have appropriate follow-up copy ready in under 60 seconds.
+
+CALL OUTCOME → OUTREACH PACK → COPY / PREPARE TO SEND → FOLLOW-UP → PIPELINE ACTION.
 
 ## Completed work
 
-- Read the required instructions/docs and recorded this sprint goal before implementation. The baseline on main remains 8f29d395e4b98313d7a737417224d9494fc9af40.
-- Built prospect list, create, edit, detail, and confirmed deletion with every requested field, ICP, and status; added company/contact/email search and ICP/status filters.
-- Added versioned browser-local persistence with validated input/data, write-before-success semantics, refresh persistence, cross-tab updates, and explicit errors without overwriting malformed data.
-- Added three labeled fictional prospects: Founder / Local Business, Soccer Club / Academy, and College Athletics. An emptied workspace stays empty instead of silently reseeding.
-- Added all seven intelligence fields and bounded whole-number scores. Totals and classifications calculate automatically; changing scores does not change status.
-- Replaced placeholder Command with TODAY'S REVENUE PRIORITIES: score first, follow-up urgency second, current status third. All requested prospect context and next actions are shown. Won/Lost remain in Prospects but are excluded from active priorities.
-- Added editable, persistent deterministic ICP Call Prep with opener, reason, five discovery questions, objections, ideal next step, claims to avoid, and demo guidance. No AI API.
-- Added fast Call Debrief with every requested field, append-only history, required follow-up dates when selected, and automatic status and next-action rules.
-- Kept scoring, ranking, templates, status transitions, and next-action rules outside UI components. Updated product, architecture, roadmap, and README to match the implemented slice.
+- Read AGENTS.md, PRODUCT.md, ARCHITECTURE.md, and the prior sprint record before implementation; recorded this sprint goal first.
+- Kept the existing prospect workflow and stayed on build/revenue-command-v1 from c7b74101680e3ec93ffe3787e02e755c253d4065. Main remains baseline 8f29d395e4b98313d7a737417224d9494fc9af40.
+- Added nine deterministic editable drafts, outcome-specific send packs, ICP offer recommendations and rationales, recommended demo outlines, and CTAs. Message generation and status/activity rules live outside UI components.
+- Added direct NEXT REVENUE ACTION controls on prospect detail and after saving a debrief: Open Send Pack, Copy Email, Copy WhatsApp, Copy DM, and Mark Sent.
+- Verified actual browser clipboard writes and read-back. Each message supports autosaved editing, copy confirmation, manual Mark Sent, and reset to generated copy.
+- Added Draft/Prepared/Sent activity with immutable sent content, timestamps, Last Outreach At, and appropriate Follow-Up transitions. Meeting/proposal stages remain intact when acknowledgments are marked sent.
+- Added a Not interested / Disqualified outcome that sets Lost and suppresses persuasive drafts and quick copy/send actions. Closed Won records also suppress outreach.
+- Added editable Next Follow-Up Date and Follow-Up Reason. Command puts overdue/due follow-ups above score-ranked priorities and displays real local priority/follow-up/demo/meeting/proposal counts.
+- Added schema version-two migration using the original localStorage key. Existing prospect ids, contacts, scores, prep, and calls survive; invalid data and failed migration writes do not replace the saved payload.
+- Updated PRODUCT.md, ARCHITECTURE.md, and README with behavior, rules, persistence, and limitations.
 
-## Validation completed
+## Validation
 
-- `npm test`: 18 tests passed, 0 failed/skipped; scoring limits, all six classification boundaries, ranking tie-breaks, every next-action value, requested-outcome precedence, templates, schema validation, CRUD persistence, write failures, corrupt-data preservation, and deletion persistence.
-- `npm run test:e2e` against the production server using cloud Chromium: 5 tests passed, 0 failed/skipped. Browser contexts were isolated from the operator's development data.
-- Full acceptance flow: create → edit → add intelligence → verify math and classification → Command → Call Prep → save edited prep → refresh → Call Debrief → Demo Requested → save → status Demo Requested → next action Send Demo → refresh → verify data persists.
-- Scores exactly 54, 55, 69, 70, 84, and 85 tested in both domain tests and browser UI.
-- Browser checks also covered search, filters, mobile navigation/layout, delete cancel/confirm, missing ids, meaningful/meeting/proposal outcomes, malformed saved data, failed writes, and absence of runtime errors.
-- `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npm run build` passed. Inspected desktop and mobile screenshots.
+- `npm test`: 32 passing domain/persistence tests, including all ICP offers, outcome precedence, sent activity, idempotent marking, follow-up ordering/counts, migration/write failures, and existing score thresholds.
+- `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e`: 12 passing production-browser tests in isolated contexts on port 3200. No browser runtime errors.
+- Soccer acceptance passed: answered/decision maker/meaningful/demo → Demo Requested/Send Demo → send pack → edit/refresh → real clipboard → Sent activity/Last Outreach At → overdue follow-up on Command. Save-to-copy completed under the 60-second assertion in the automated flow.
+- Email Requested, Meeting Requested, and Proposal Requested packs passed. All nine channel edits, copies, resets, and persistence passed. Existing CRUD, scoring boundaries, call prep/debrief, filters, deletion, mobile navigation, corrupt data, and write-failure regressions passed.
+- `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npm run build`: passed with no application errors. Mobile outreach screenshot reviewed and no horizontal overflow detected.
+- `.gitignore` excludes secrets/env values, dependencies, build output, and browser artifacts. Only project source, documentation, and tests belong in the commit.
 
 ## Active work
 
-Implementation and acceptance validation are complete. The authorized delivery step is to commit with `feat: build revenue prospecting workflow` and push only `origin/build/revenue-command-v1`; the task's final report records the resulting SHA and push verification.
+Implementation and validation are complete. Persist this sprint with `feat: build prospect outreach command` and push only origin/build/revenue-command-v1. Do not modify or merge main.
 
 ## Next work
 
-Await the next scoped revenue task. Do not merge main, add unrelated features, or add external services without explicit instruction.
+Await the next explicitly scoped revenue task. No additional product development is included in this sprint.
 
 ## Known limitations
 
-- Data is saved only in this browser and origin/port; clearing site data loses it. No server backup, export, cross-device sync, or authentication was added. Concurrent edits are last-write-wins.
-- Scores are operator-assigned; intelligence is not externally verified. Estimated opportunity values are USD hypotheses. The seed records are fictional.
-- Call Prep and recommended actions are deterministic. Recommendations do not send emails/demos, make calls, schedule meetings, or create proposals. Call Tomorrow is a fixed recommendation label; an operator-selected follow-up date stays visible separately.
-- Call history is append-only in this slice; call editing and automated follow-up completion are not implemented. Opportunities and Playbooks remain the existing planned workspaces, outside this task.
+Data remains browser/origin-local, without server backup, authentication, or cross-device collaboration. Copying prepares text; Mark Sent records the operator's manual delivery. The operator supplies actual demo links/assets and reviews claims. Offer matching is deterministic, based on ICP and recorded keywords. No AI API, external message delivery, database, notifications, or scheduling integration was added.

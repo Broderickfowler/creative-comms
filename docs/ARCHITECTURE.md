@@ -20,11 +20,17 @@ The root layout renders the shared shell. `/` redirects to `/command`; other wor
 
 ## Data and services
 
-`src/types/prospect.ts` defines contact/company fields, intelligence, scores, call-prep edits, and call history. `src/features/prospects/domain` owns pure scoring, classification, priority ranking, call status transitions, next-action recommendations, defaults, and deterministic ICP templates. UI components collect input and render results; they do not own these rules.
+`src/types/prospect.ts` defines contact/company fields, intelligence, scores, call-prep edits, call history, outreach activities, and follow-up context. `src/types/outreach.ts` defines the nine message types, channels, and activity/pack contracts. `src/features/prospects/domain` owns pure scoring, classification, priority ranking, call status transitions, next-action recommendations, defaults, and deterministic ICP templates. UI components collect input and render results; they do not own these rules.
 
 `src/services/prospect-store.ts` provides a small external store consumed through `useSyncExternalStore`. Server snapshots show a loading state; browser initialization reads the versioned workspace and seeds fictional examples only when no workspace exists. `workspace-schema.ts` uses Zod to validate all persisted fields, score limits, dates, and ids. A malformed/unsupported workspace is preserved and surfaces an error. Successful mutations write before emitting a new UI snapshot. Reads before mutation reduce stale-tab overwrites; simultaneous editing is still last-write-wins, not transactional collaboration.
 
 The store uses `localStorage` at `sekairos.revenue-command.v1`. No external database, auth provider, AI API, or other integration is added. Clearing site data loses records; browsers and origins have separate workspaces. Do not add generic storage abstractions before a concrete need.
+
+`src/features/outreach/domain` owns deterministic message generation, outcome-specific pack selection, ICP offer recommendations, and activity/status transitions. `src/services/clipboard.ts` owns browser copy, with a user-initiated fallback and explicit failure reporting. `use-outreach-actions` connects successful clipboard writes to Prepared activity and records manual sends; it never delivers messages. Components keep presentation and editable drafts separate from these rules.
+
+Workspace schema version 2 adds outreach activity, Last Outreach At, Next Follow-Up Date, Follow-Up Reason, and a default false notInterested call flag. The existing storage key is deliberately retained. Valid version-one records migrate additively in place without changing ids, scores, contacts, prep, or calls. Migration write failures preserve the old saved payload and surface an error. Invalid or unsupported data is never reseeded. Activities validate ownership, call context, unique ids, statuses and sent timestamps. Drafts can be temporarily empty while editing; Prepared/Sent messages cannot.
+
+Draft edits autosave on change. A message is keyed by prospect, message type, and latest call id, so new calls generate fresh drafts while older activity remains available. Draft/Prepared records update in place until marked Sent; subsequent edits append a new draft and preserve the sent content. Next Follow-Up Date uses null for legacy call-date fallback and an empty string for an explicitly cleared date. Dates use the browser's local calendar, with due/overdue ordering implemented in the prospect domain.
 
 Call histories are append-only within this slice. Debriefs update selected nonempty intelligence signals while retaining operator scores. Custom prep persists until edited/reset. Recommendations are pure decisions; no action is executed externally.
 

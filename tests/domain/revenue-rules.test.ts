@@ -252,10 +252,13 @@ test("Each ICP has exactly five distinct deterministic questions and an editable
 });
 test("Workspace round-trip retains all fields and rejects corrupt, duplicate, invalid-score, or unsupported data", () => {
   const workspace = { version: 1, prospects: seedProspects(now) };
-  assert.deepEqual(parseWorkspace(JSON.stringify(workspace)), workspace);
+  assert.deepEqual(parseWorkspace(JSON.stringify(workspace)), {
+    ...workspace,
+    version: 2,
+  });
   assert.throws(() => parseWorkspace("not json"));
   assert.throws(() =>
-    parseWorkspace(JSON.stringify({ ...workspace, version: 2 })),
+    parseWorkspace(JSON.stringify({ ...workspace, version: 3 })),
   );
   assert.throws(() =>
     parseWorkspace(

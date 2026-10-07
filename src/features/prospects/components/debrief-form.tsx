@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { NextRevenueAction } from "@/features/outreach/components/next-revenue-action";
 import Link from "next/link";
 import {
   CheckboxField,
@@ -45,7 +46,7 @@ export function DebriefForm({ prospect: p }: { prospect: Prospect }) {
     <form onSubmit={submit} className="space-y-5">
       <FormSection
         title="Call outcome"
-        description="Check the outcomes, capture the essentials, and save. Proposal takes priority over meeting, then demo."
+        description="Check the outcomes, capture the essentials, and save. Not interested stops outreach. Otherwise proposal takes priority over meeting, then demo."
       >
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {outcomeFields.map(({ key, label }) => (
@@ -114,6 +115,7 @@ export function DebriefForm({ prospect: p }: { prospect: Prospect }) {
           </p>
         </section>
       )}
+      {saved && <NextRevenueAction prospect={p} />}
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={saved}>
           {saved ? "Call saved" : "Save call debrief"}

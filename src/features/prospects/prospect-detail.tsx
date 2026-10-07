@@ -1,5 +1,8 @@
 "use client";
 import Link from "next/link";
+import { NextRevenueAction } from "@/features/outreach/components/next-revenue-action";
+import { FollowUpEditor } from "@/features/outreach/components/follow-up-editor";
+import { OutreachActivityList } from "@/features/outreach/components/outreach-activity";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Phone, NotebookPen, Pencil, Trash2, ArrowLeft } from "lucide-react";
@@ -31,7 +34,7 @@ export function ProspectDetail({ id }: { id: string }) {
     if (
       !prospect ||
       !window.confirm(
-        `Delete ${prospect.companyName} and its intelligence, call prep, and call history from this browser? This cannot be undone.`,
+        `Delete ${prospect.companyName} and its intelligence, call prep, call history, and outreach activity from this browser? This cannot be undone.`,
       )
     )
       return;
@@ -148,6 +151,8 @@ export function ProspectDetail({ id }: { id: string }) {
           </p>
         </div>
       </div>
+      <NextRevenueAction prospect={p} />
+      <FollowUpEditor key={id} prospect={p} />
       <details className="mb-6 rounded-xl border bg-white p-5">
         <summary className="cursor-pointer text-sm font-medium">
           Contact details & prospect notes
@@ -181,6 +186,7 @@ export function ProspectDetail({ id }: { id: string }) {
       </details>
       <IntelligenceEditor key={id} id={id} initial={p.intelligence} />
       <CallHistory calls={p.calls} />
+      <OutreachActivityList prospect={p} />
     </WorkspaceGate>
   );
 }
