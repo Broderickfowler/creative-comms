@@ -1,0 +1,80 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, monospace;
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #f5f6f3;
+  --foreground: #1b2b27;
+  --card: #ffffff;
+  --card-foreground: #1b2b27;
+  --popover: #ffffff;
+  --popover-foreground: #1b2b27;
+  --primary: #176b57;
+  --primary-foreground: #ffffff;
+  --secondary: #e9f0eb;
+  --secondary-foreground: #285c4e;
+  --muted: #e9ede8;
+  --muted-foreground: #68766e;
+  --accent: #e9f0eb;
+  --accent-foreground: #176b57;
+  --destructive: #c44435;
+  --border: #dde3dc;
+  --input: #dde3dc;
+  --ring: #176b57;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background font-sans text-foreground;
+  }
+  ::selection {
+    background: #bee8da;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply text-[10px] font-semibold tracking-[0.18em] text-muted-foreground;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
