@@ -42,3 +42,7 @@ next-env.d.ts
 
 # Keep variable documentation, never actual values.
 !.env.example
+
+# Browser acceptance test artifacts
+/test-results/
+/playwright-report/

@@ -6,9 +6,9 @@ The sequence is a direction, not a commitment to implement every item. Prioritiz
 
 Initialize the requested stack, strict tooling, docs, responsive shell, working navigation, and an honest placeholder Command page. Validate lint, type-check, build, and functional navigation.
 
-## 2. First operator workflow
+## 2. First operator workflow — complete in this slice
 
-Define a prospect record around DESIRE, VISION, MONEY, FRICTION, TIMING, and SEKAIROS FIT. Let the operator capture context, identify a contact reason, and record a concrete next action. Choose the simplest persistence approach only when explicitly scoped. Do not require a CRM integration to make the first workflow useful.
+Prospect CRUD, intelligence, score/classification, Command ranking, editable ICP Call Prep, Call Debrief, and recommended next action now work using browser-local persistence. No external database or CRM is required.
 
 ## 3. Opportunity execution
 

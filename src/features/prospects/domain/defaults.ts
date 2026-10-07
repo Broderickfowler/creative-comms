@@ -1,0 +1,77 @@
+import type {
+  DebriefFields,
+  Intelligence,
+  Prospect,
+  ProspectFields,
+} from "@/types/prospect";
+export const blankProspect: ProspectFields = {
+  companyName: "",
+  website: "",
+  contactFirstName: "",
+  contactLastName: "",
+  contactRole: "",
+  email: "",
+  phone: "",
+  industry: "",
+  location: "",
+  source: "",
+  icp: "Founder / Local Business",
+  status: "New",
+  notes: "",
+  estimatedOpportunityValue: 0,
+};
+export const blankIntelligence: Intelligence = {
+  desiredOutcome: "",
+  visionSignal: "",
+  moneySignal: "",
+  operationalFriction: "",
+  timingSignal: "",
+  sekairosOpportunity: "",
+  verificationNeeded: "",
+  scores: {
+    desire: 0,
+    vision: 0,
+    money: 0,
+    friction: 0,
+    timing: 0,
+    sekairosFit: 0,
+  },
+};
+export const blankDebrief: DebriefFields = {
+  answered: false,
+  decisionMakerReached: false,
+  meaningfulConversation: false,
+  emailRequested: false,
+  demoRequested: false,
+  meetingRequested: false,
+  proposalRequested: false,
+  budgetMentioned: false,
+  followUpRequired: false,
+  currentProcess: "",
+  primaryProblem: "",
+  desiredOutcome: "",
+  moneySignal: "",
+  timing: "",
+  currentTechnology: "",
+  objection: "",
+  followUpDate: "",
+  nextAction: "",
+  notes: "",
+};
+export function createProspect(
+  fields: ProspectFields,
+  id: string,
+  now: string,
+): Prospect {
+  return {
+    ...fields,
+    companyName: fields.companyName.trim(),
+    id,
+    createdAt: now,
+    updatedAt: now,
+    isFictional: false,
+    intelligence: structuredClone(blankIntelligence),
+    callPrep: null,
+    calls: [],
+  };
+}

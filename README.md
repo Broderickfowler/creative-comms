@@ -1,57 +1,82 @@
 # SEKAIROS REVENUE COMMAND
 
-An internal revenue execution system for Sekairos. It helps one operator move from prospect context to a clear next revenue action.
+An internal revenue execution system for Sekairos. The first working vertical slice is:
 
-This repository contains the application foundation: a responsive shell, working navigation, a placeholder Command page, and planned workspace pages. The illustrative brief is fictional. No live prospect data, CRM, authentication, database, or external service is connected.
+**PROSPECT → INTELLIGENCE → OPPORTUNITY SCORE → REVENUE PRIORITY → CALL PREP → CALL DEBRIEF → NEXT ACTION**
 
 ## Develop
 
-Use Node.js 24 LTS and npm. Package versions are captured in `package-lock.json`.
+Use Node.js 24 LTS and npm. Versions are captured in `package-lock.json`.
 
 ```bash
 npm ci
 npm run dev
 ```
 
-No environment variables are required for the foundation. `.env.example` documents this; never commit actual secrets. If cloud npm cache access is restricted, prefix install commands with `NPM_CONFIG_CACHE=/workspace/.npm-cache`.
+No environment variables or external services are required. `.env.example` documents this. In the cloud machine, use `NPM_CONFIG_CACHE=/workspace/.npm-cache` for npm installation commands. Do not commit credentials.
+
+## What works
+
+- Prospect creation, editing, detail, and deletion with confirmation. All specified contact/company fields, the three ICPs, and thirteen statuses are supported.
+- Search by company, contact, or email; filter by ICP and status.
+- Editable intelligence with six bounded integer scores, automatic totals out of 100, and exact classification thresholds.
+- Command priorities sorted by score, follow-up urgency, then status. Won and Lost are excluded from active priorities but retained in Prospects.
+- ICP-specific deterministic Call Prep: editable opener, reason, exactly five questions, objections, next step, claims to avoid, and demo guidance. Draft templates and saved customizations remain distinct.
+- Fast Call Debrief with requested outcomes, conversation context, follow-up date, operator action notes, immutable history, automatic status changes, and a recommended next action.
+- Persistent local workspace, including deleted records staying deleted and edits surviving refresh. Three clearly labeled fictional examples seed only a new workspace.
+- Responsive desktop/mobile navigation and recovery for missing prospect ids.
+
+## Persistence
+
+Records are stored in `localStorage` under `sekairos.revenue-command.v1`, scoped to one browser and origin (including the port). Refreshing preserves data. Another browser, device, hostname, or port has a separate workspace. Clearing browser data removes the workspace. There is no server copy, multi-user synchronization, backup/export, or authentication in this slice. Do not treat this as a hardened system for sensitive records.
+
+Writes complete before the UI reports success. Invalid saved data is left untouched and shows an error instead of being replaced. Storage access/quota failures show errors. Other tabs receive storage updates; simultaneous edits use last-write-wins semantics and are not a collaboration feature.
+
+Estimated opportunity values and fixture money signals are hypotheses in USD, not confirmed revenue. Example websites use the reserved `.example` domain. Recommendations do not send messages, make calls, create proposals, or schedule meetings.
+
+## Routes
+
+| Route                          | Behavior                                                           |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `/`                            | Redirect to Command                                                |
+| `/command`                     | Today's ranked revenue priorities                                  |
+| `/prospects`                   | Searchable/filterable list                                         |
+| `/prospects/new`               | Create prospect                                                    |
+| `/prospects/[id]`              | Contact detail, intelligence, score, next action, and call history |
+| `/prospects/[id]/edit`         | Edit prospect fields                                               |
+| `/prospects/[id]/call-prep`    | Editable deterministic ICP template                                |
+| `/prospects/[id]/debrief`      | Log a call and calculate the next action                           |
+| `/opportunities`, `/playbooks` | Retained planned workspaces, outside this slice                    |
 
 ## Validate
 
 ```bash
 npm run lint
 npm run typecheck
+npm test
+npm run format:check
 npm run build
-npm run start
 ```
 
-`typecheck` generates Next.js route types before running TypeScript so it also works in a fresh checkout. Stop the development server before production build/start validation. Build output and running processes are local state, not source. The default port is 3000; pass `-- --port 3100` to `dev` or `start` if needed.
+The type check generates route types before compiling. Domain tests use Node's test runner with tsx. Stop development before production build validation.
 
-## Current routes
+The committed browser acceptance suite starts the production server on port 3200 and uses isolated browser contexts, separate from the operator's development workspace. Build first and install a Playwright browser once:
 
-| Route            | Behavior                                                              |
-| ---------------- | --------------------------------------------------------------------- |
-| `/`              | Redirects to Command                                                  |
-| `/command`       | Foundation overview, six intelligence lenses, fictional example brief |
-| `/prospects`     | Explicit placeholder for prospect context                             |
-| `/opportunities` | Explicit placeholder for revenue opportunities                        |
-| `/playbooks`     | Explicit placeholder for offers and messaging                         |
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
 
-The desktop sidebar and mobile drawer navigate to actual pages, highlight the active route, and support keyboard navigation. The mobile drawer closes on selection or Escape. There are no inactive action buttons.
+In the supplied cloud environment, use its Chromium installation:
 
-## Stack and structure
+```bash
+PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e
+```
 
-Next.js App Router, strict TypeScript, Tailwind CSS, shadcn/ui, and lucide-react. The app uses system fonts and has no runtime dependency on remote fonts.
+This test-only variable is optional. Browser traces/screenshots are ignored local artifacts. Tests cover the complete requested workflow, score boundaries, persistence, filters, mobile navigation, delete confirmation, strong outcome precedence, corrupted data, and failed writes.
 
-- `src/app`: routes, layouts, global styles, metadata.
-- `src/components`: shared shell and shadcn/ui primitives.
-- `src/features`: feature-specific screens and behavior.
-- `src/lib`: small shared utilities and navigation definitions.
-- `src/services`: future I/O adapters; no integrations yet.
-- `src/types`: shared domain types.
-- `src/data`: explicitly labeled fictional fixtures.
+## Stack and conventions
 
-Read [Product](docs/PRODUCT.md), [Architecture](docs/ARCHITECTURE.md), [Roadmap](docs/ROADMAP.md), and [Current sprint](docs/CURRENT_SPRINT.md). Codex contributors must follow [AGENTS.md](AGENTS.md).
+Next.js App Router, strict TypeScript, Tailwind CSS, shadcn/ui, lucide-react, and Zod runtime validation. System fonts remove remote font dependencies. Feature rules live in `src/features/prospects/domain`; browser I/O lives in `src/services`; routes remain thin.
 
-## Scope and limitations
-
-This is a production repository foundation, not a complete or deployed production system. Prospect editing, prioritization, persistent data, authentication, offers, outreach, and follow-up automation are not implemented. Those decisions belong to later feature tasks. No external services have been added.
+Read [Product](docs/PRODUCT.md), [Architecture](docs/ARCHITECTURE.md), [Roadmap](docs/ROADMAP.md), and [Current sprint](docs/CURRENT_SPRINT.md). Follow [AGENTS.md](AGENTS.md). Development stays on `build/revenue-command-v1`; do not merge main without instruction.

@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             className="gap-2 bg-white px-3 py-1.5 text-[10px] font-medium"
           >
             <span className="size-1.5 rounded-full bg-primary" />
-            Foundation v0.1
+            Revenue workflow v0.2
           </Badge>
         </header>
         <main

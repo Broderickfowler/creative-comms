@@ -36,6 +36,35 @@ Evidence and assumptions must remain distinguishable. Unknown information should
 
 A **next action** is concrete: an owner, an action, a target, and a timing decision. An **offer** must connect to DESIRE, address FRICTION, and make SEKAIROS FIT clear. Do not imply that fictional examples are qualified or that inferred budget is confirmed money.
 
-## Foundation scope
+## Current vertical slice
 
-This sprint establishes the repository, documentation, shell, navigation, and placeholder Command page. It does not implement revenue scoring, a CRM, prospect CRUD, automated messaging, payments, AI generation, or external integrations. Revenue-producing functionality is the priority for subsequent sprints; keep implementation decisions simple and reversible.
+The first working slice connects PROSPECT → INTELLIGENCE → OPPORTUNITY SCORE → REVENUE PRIORITY → CALL PREP → CALL DEBRIEF → NEXT ACTION. Prospects can be created, edited, inspected, and deleted in a persistent browser-local workspace. The three ICP values are Founder / Local Business, Soccer Club / Academy, and College Athletics. Status is separate from score classification.
+
+### Opportunity Score
+
+| Lens         | Score range |
+| ------------ | ----------- |
+| DESIRE       | 0–20        |
+| VISION       | 0–20        |
+| MONEY        | 0–25        |
+| FRICTION     | 0–15        |
+| TIMING       | 0–10        |
+| SEKAIROS FIT | 0–10        |
+
+Scores are whole numbers, bounded at each input and validated before storage. The total sums automatically with a maximum of 100. A score of 85–100 is CALL NOW; 70–84 is ACTIVE PURSUIT; 55–69 is NURTURE; 0–54 is LOW PRIORITY. Changing scores does not silently change prospect status.
+
+Command ranks open prospects by total descending, then the earliest required follow-up date, then status. No follow-up sorts after dated follow-ups. Status tie-break order is Call Now, Proposal, Meeting Requested, Meeting Booked, Demo Requested, Follow-Up, Qualified, Contacted, Researching, New, Nurture. Won and Lost stay in Prospects but are excluded from Command. Company name and id break exact ties deterministically.
+
+### Call outcomes and next actions
+
+Call Prep uses editable ICP-specific templates without an AI API. Operators must verify context and avoid unsupported claims. Saving Call Prep keeps custom wording until it is edited or reset and saved.
+
+Requested call outcomes take precedence: Proposal Requested → Proposal, otherwise Meeting Requested → Meeting Requested, otherwise Demo Requested → Demo Requested. A meaningful conversation sets Contacted when no stronger requested outcome or existing stronger status applies; otherwise the existing status remains. Ordinary meaningful calls do not downgrade existing Demo Requested, Meeting Requested, Meeting Booked, Proposal, Won, or Lost statuses. Explicit requested outcomes take precedence over the current status.
+
+The next-action engine is deterministic: Lost → Disqualify; Won → Nurture (closed records do not enter Command); proposal request/status → Create Proposal; meeting request/status → Schedule Meeting; demo request/status → Send Demo; email request → Send Email; follow-up required or unanswered call → Call Tomorrow; otherwise a score of 70+ → Call Tomorrow and lower scores → Nurture. This is a recommendation, not an executed action. A chosen follow-up date remains visible alongside it; Call Tomorrow is the fixed recommendation label, not an automated reschedule of that date.
+
+Call Debrief preserves every entered field and appends immutable history. Nonempty Desired Outcome, Money Signal, Timing, and Primary Problem values update matching intelligence signals. Scores remain operator-assigned. Next Action in the form records the operator's own notes; the recommendation is computed separately. Follow-Up Date is required when Follow-Up Required is checked.
+
+### Scope boundaries
+
+This slice has local persistence, not an external database. No CRM, email delivery, AI API, payments, automated outreach, authentication, cross-device sync, or unrelated feature is included. Estimated opportunity values are USD hypotheses, not confirmed revenue. Fictional seeds remain visibly labeled. Browser storage is not a backup or a production access-control system.
