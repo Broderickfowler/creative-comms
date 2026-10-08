@@ -78,3 +78,250 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Opportunity Brief: an executive document, with browser-native PDF printing. */
+.opportunity-brief {
+  max-width: 860px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #dde3dc;
+  box-shadow: 0 12px 48px #1025220a;
+  padding: 42px 48px;
+  color: #1b2b27;
+}
+.brief-masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 3px solid #176b57;
+  padding-bottom: 16px;
+}
+.brief-wordmark {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+}
+.brief-edition {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #176b57;
+}
+.brief-intro {
+  padding: 24px 0 20px;
+  border-bottom: 1px solid #dde3dc;
+}
+.brief-kicker {
+  font-size: 9px;
+  letter-spacing: 0.17em;
+  color: #68766e;
+  font-weight: 600;
+}
+.brief-intro h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 12px 0 18px;
+  overflow-wrap: anywhere;
+}
+.brief-meta {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 18px;
+}
+.brief-meta dt {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #68766e;
+}
+.brief-meta dd {
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.brief-example {
+  font-size: 9px;
+  color: #85601b;
+  margin-top: 10px;
+}
+.brief-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 30px;
+  row-gap: 18px;
+  padding: 24px 0;
+}
+.brief-section {
+  break-inside: avoid;
+  min-width: 0;
+}
+.brief-section h2,
+.brief-asset h2,
+.brief-score-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  color: #176b57;
+  margin-bottom: 7px;
+}
+.brief-section p {
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.brief-first-move {
+  border-left: 3px solid #176b57;
+  padding-left: 12px;
+}
+.brief-first-move p {
+  font-weight: 600;
+}
+.brief-asset {
+  padding: 18px 0;
+  border-top: 1px solid #dde3dc;
+  break-inside: avoid;
+}
+.brief-asset h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.brief-asset p {
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+.brief-asset-url {
+  display: block;
+  font-size: 10px;
+  margin-top: 6px;
+  color: #176b57;
+  overflow-wrap: anywhere;
+}
+.brief-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+  border-top: 1px solid #dde3dc;
+  padding-top: 16px;
+  break-inside: avoid;
+}
+.brief-score {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.brief-score span {
+  font-size: 9px;
+  font-weight: 500;
+  color: #68766e;
+}
+.brief-footnote {
+  font-size: 9px;
+  line-height: 1.5;
+  color: #68766e;
+  text-align: right;
+}
+@media screen and (max-width: 640px) {
+  .opportunity-brief {
+    padding: 24px 20px;
+  }
+  .brief-wordmark {
+    font-size: 17px;
+  }
+  .brief-edition {
+    font-size: 8px;
+  }
+  .brief-intro h1 {
+    font-size: 29px;
+  }
+  .brief-meta {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .brief-grid {
+    grid-template-columns: 1fr;
+    row-gap: 20px;
+  }
+  .brief-footer {
+    align-items: start;
+    flex-direction: column;
+  }
+  .brief-footnote {
+    text-align: left;
+  }
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  body:has(.opportunity-brief) {
+    background: #fff !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  body:has(.opportunity-brief) [data-print-internal],
+  body:has(.opportunity-brief) nextjs-portal {
+    display: none !important;
+  }
+  body:has(.opportunity-brief) .app-content {
+    margin: 0 !important;
+  }
+  body:has(.opportunity-brief) #main-content {
+    padding: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+  .opportunity-brief {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+  .brief-masthead {
+    padding-bottom: 10px;
+  }
+  .brief-intro {
+    padding: 18px 0 16px;
+  }
+  .brief-intro h1 {
+    font-size: 30px;
+  }
+  .brief-meta {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+  .brief-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+    padding: 18px 0;
+  }
+  .brief-section p {
+    font-size: 10.5pt;
+    line-height: 1.45;
+  }
+  .brief-section h2,
+  .brief-asset h2,
+  .brief-score-label {
+    font-size: 8pt;
+  }
+  .brief-asset {
+    padding: 12px 0;
+  }
+  .brief-footer {
+    flex-direction: row;
+    align-items: end;
+    padding-top: 12px;
+  }
+  .brief-footnote {
+    text-align: right;
+  }
+}

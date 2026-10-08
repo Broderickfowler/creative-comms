@@ -3,6 +3,7 @@ import {
   UsersRound,
   TrendingUp,
   BookOpen,
+  Library,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,6 +26,12 @@ export const navigation = [
     label: "Prospects",
     description: "People and their context",
     icon: UsersRound,
+  },
+  {
+    href: "/sales-assets",
+    label: "Sales Assets",
+    description: "Material matched to the next move",
+    icon: Library,
   },
   {
     href: "/opportunities",

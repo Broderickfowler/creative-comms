@@ -4,6 +4,8 @@ import { WorkspaceGate } from "@/features/prospects/components/workspace-gate";
 import { MissingProspect } from "@/features/prospects/components/missing-prospect";
 import { ProspectHeading } from "@/features/prospects/components/prospect-heading";
 import { generateOutreachPack, currentCallId } from "./domain/messages";
+import { RecommendedMaterial } from "./components/recommended-material";
+import { matchSalesAssets } from "@/features/sales-assets/domain/matching";
 import { NextRevenueAction } from "./components/next-revenue-action";
 import { MessageEditor } from "./components/message-editor";
 import { FollowUpEditor } from "./components/follow-up-editor";
@@ -17,14 +19,18 @@ export function OutreachPage({ id }: { id: string }) {
         <MissingProspect />
       </WorkspaceGate>
     );
-  const pack = generateOutreachPack(p);
+  const pack = generateOutreachPack(p, store.assets);
+  const match = matchSalesAssets(p, store.assets);
   const primary = [pack.primaryEmail, "WhatsApp Message", "LinkedIn DM"];
   const ready = pack.messages.filter((m) => primary.includes(m.messageType));
   const other = pack.messages.filter((m) => !primary.includes(m.messageType));
   return (
     <WorkspaceGate {...store}>
       <ProspectHeading prospect={p} title="Outreach" />
-      <NextRevenueAction prospect={p} />
+      <NextRevenueAction prospect={p} assets={store.assets} />
+      {pack.messages.length > 0 && (
+        <RecommendedMaterial prospect={p} assets={store.assets} />
+      )}
       <section
         className="mb-6 space-y-5 rounded-xl border bg-white p-5"
         data-testid="send-pack"
@@ -46,7 +52,9 @@ export function OutreachPage({ id }: { id: string }) {
               className="mt-2 text-sm leading-6"
               data-testid="recommended-demo"
             >
-              {pack.recommendedDemo}
+              {match.primary?.type === "Demo"
+                ? `${match.primary.name} — ${pack.recommendedDemo}`
+                : pack.recommendedDemo}
             </p>
           </div>
           <div>
@@ -63,9 +71,9 @@ export function OutreachPage({ id }: { id: string }) {
         </div>
         {pack.messages.length > 0 && (
           <p className="text-xs leading-5 text-muted-foreground">
-            Drafts use recorded context. Review claims and add the actual demo
-            link or attachment before manually sending a demo. A recommended
-            demo is an outline, not an attached asset.
+            Review recorded context, replace example asset links, and attach the
+            printed Opportunity Brief before manually sending. Use Copy Asset
+            Link or Add Asset Link on the message to prepare the collateral.
           </p>
         )}
       </section>
@@ -83,6 +91,7 @@ export function OutreachPage({ id }: { id: string }) {
                   key={`${m.messageType}:${currentCallId(p)}`}
                   prospect={p}
                   generated={m}
+                  asset={match.primary}
                 />
               ))}
           </div>
@@ -96,6 +105,7 @@ export function OutreachPage({ id }: { id: string }) {
                   key={`${m.messageType}:${currentCallId(p)}`}
                   prospect={p}
                   generated={m}
+                  asset={match.primary}
                 />
               ))}
             </div>

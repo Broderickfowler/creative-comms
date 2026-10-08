@@ -9,12 +9,19 @@ import {
   SaveFeedback,
 } from "@/components/forms/fields";
 import { Button } from "@/components/ui/button";
+import type { SalesAsset } from "@/types/sales-asset";
 import type { DebriefFields, Prospect } from "@/types/prospect";
 import { blankDebrief } from "../domain/defaults";
 import { recommendedNextAction } from "../domain/call-outcome";
 import { saveDebrief } from "@/services/prospect-store";
 import { outcomeFields, conversationFields } from "./debrief-field-definitions";
-export function DebriefForm({ prospect: p }: { prospect: Prospect }) {
+export function DebriefForm({
+  prospect: p,
+  assets,
+}: {
+  prospect: Prospect;
+  assets: SalesAsset[];
+}) {
   const [value, setValue] = useState<DebriefFields>({
     ...blankDebrief,
     desiredOutcome: p.intelligence.desiredOutcome,
@@ -115,7 +122,7 @@ export function DebriefForm({ prospect: p }: { prospect: Prospect }) {
           </p>
         </section>
       )}
-      {saved && <NextRevenueAction prospect={p} />}
+      {saved && <NextRevenueAction prospect={p} assets={assets} />}
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={saved}>
           {saved ? "Call saved" : "Save call debrief"}

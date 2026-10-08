@@ -11,6 +11,7 @@ import {
   localDate,
 } from "@/features/prospects/domain/priorities";
 import { FollowUpsDue } from "./components/follow-ups-due";
+import { MaterialToSend } from "./components/material-to-send";
 import { PriorityCard } from "./components/priority-card";
 export function CommandPage() {
   const store = useProspects();
@@ -71,6 +72,7 @@ export function CommandPage() {
         do not send messages.
       </p>
       <FollowUpsDue prospects={due} today={today} />
+      <MaterialToSend prospects={store.prospects} assets={store.assets} />
       <h2 className="mb-4 text-lg font-semibold">Revenue priorities</h2>
       <div className="space-y-4">
         {priorities.map((p, index) => (

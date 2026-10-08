@@ -6,6 +6,7 @@ export function Sidebar() {
   return (
     <aside
       className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-[#102522] px-5 py-7 lg:flex"
+      data-print-internal
       aria-label="Workspace sidebar"
     >
       <Brand />

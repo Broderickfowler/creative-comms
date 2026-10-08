@@ -7,14 +7,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       <a
+        data-print-internal
         href="#main-content"
         className="fixed left-4 top-4 z-50 -translate-y-24 rounded-lg bg-primary px-4 py-2 text-primary-foreground focus:translate-y-0"
       >
         Skip to content
       </a>
       <Sidebar />
-      <div className="lg:ml-64">
-        <header className="flex h-20 items-center justify-between gap-3 border-b bg-white/70 px-5 sm:px-10">
+      <div className="app-content lg:ml-64">
+        <header
+          data-print-internal
+          className="flex h-20 items-center justify-between gap-3 border-b bg-white/70 px-5 sm:px-10"
+        >
           <div className="flex items-center gap-3">
             <MobileNavigation />
             <span className="text-xs font-medium tracking-wide text-muted-foreground">
@@ -27,7 +31,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             className="gap-2 bg-white px-3 py-1.5 text-[10px] font-medium"
           >
             <span className="size-1.5 rounded-full bg-primary" />
-            Revenue workflow v0.2
+            Revenue workflow v0.3
           </Badge>
         </header>
         <main
@@ -37,7 +41,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         >
           {children}
         </main>
-        <footer className="mx-5 flex flex-wrap items-center justify-between gap-2 border-t py-6 text-[10px] text-muted-foreground sm:mx-10">
+        <footer
+          data-print-internal
+          className="mx-5 flex flex-wrap items-center justify-between gap-2 border-t py-6 text-[10px] text-muted-foreground sm:mx-10"
+        >
           <span>SEKAIROS REVENUE COMMAND</span>
           <span className="flex items-center gap-1">
             Built for the next move{" "}

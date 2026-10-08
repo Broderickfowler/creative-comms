@@ -283,7 +283,7 @@ test("Version-one migration preserves calls, scores, prep and every prospect whi
   const migrated = parseWorkspace(
     JSON.stringify({ version: 1, prospects: [legacy] }),
   );
-  assert.equal(migrated.version, 2);
+  assert.equal(migrated.version, 3);
   assert.deepEqual(migrated.prospects, [
     {
       ...old,

@@ -97,6 +97,9 @@ export function ProspectDetail({ id }: { id: string }) {
             </Link>
           </Button>
           <Button asChild variant="outline">
+            <Link href={`/prospects/${id}/brief`}>Opportunity Brief</Link>
+          </Button>
+          <Button asChild variant="outline">
             <Link href={`/prospects/${id}/edit`}>
               <Pencil className="size-4" />
               Edit prospect
@@ -151,7 +154,7 @@ export function ProspectDetail({ id }: { id: string }) {
           </p>
         </div>
       </div>
-      <NextRevenueAction prospect={p} />
+      <NextRevenueAction prospect={p} assets={store.assets} />
       <FollowUpEditor key={id} prospect={p} />
       <details className="mb-6 rounded-xl border bg-white p-5">
         <summary className="cursor-pointer text-sm font-medium">

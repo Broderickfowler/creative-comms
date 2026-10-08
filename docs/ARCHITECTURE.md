@@ -34,6 +34,16 @@ Draft edits autosave on change. A message is keyed by prospect, message type, an
 
 Call histories are append-only within this slice. Debriefs update selected nonempty intelligence signals while retaining operator scores. Custom prep persists until edited/reset. Recommendations are pure decisions; no action is executed externally.
 
+## Collateral slice
+
+`src/types/sales-asset.ts` owns asset fields, supported types/ICPs/statuses, and matching results. `src/types/opportunity-brief.ts` defines editable brief fields and the saved customization contract. `src/features/sales-assets/domain` owns URL validation/example detection, deterministic matching, and the pending-material queue. `src/features/briefs/domain` generates briefs from recorded signals, resolves overrides, and calculates only changed fields for persistence. Domain functions do not fetch external URLs, calculate ROI, or deliver messages.
+
+The same external store now owns assets and prospect brief customizations. Schema version 3 retains `sekairos.revenue-command.v1`; versions 1/2 migrate additively with seeded example assets and null brief defaults. Prospects, scores, calls, draft edits, sent activity, and follow-up dates are preserved. Version-three assets are required, so an invalid missing library is not silently recreated. Empty libraries remain empty. Asset ids are unique; links must use HTTP/HTTPS without embedded credentials or whitespace. Writes validate and persist the whole workspace before emitting either asset or prospect changes, preserving both collections on failure.
+
+A brief stores `{ overrides, updatedAt }` on its prospect. Generated content is derived at read time; no duplicate copy of intelligence or matched assets is stored. Asset updates/deletion and non-overridden intelligence changes appear immediately. Overrides affect collateral wording without changing the prospect, score, or matcher inputs.
+
+Routes are `/sales-assets`, `/sales-assets/new`, `/sales-assets/[id]/edit`, and `/prospects/[id]/brief`. The brief route awaits both params and searchParams; `?print=1` starts browser printing once local data and the document are rendered. The server route only passes the intent to the client. Print rules apply when the brief document is present, hide marked internal shell/form/action elements, reset application margins, and use an A4 document layout. No PDF generation dependency or upload service is added. Browser acceptance uses Chromium PDF output only to verify pagination and exported content.
+
 ## UI conventions
 
 Use the shared neutral/teal tokens, responsive layout, readable spacing, and shadcn/ui components. Navigation must expose the current page through `aria-current`. Mobile navigation uses an accessible drawer. Links navigate; buttons perform implemented actions. Planned work is text, not a disabled or misleading control. Use system fonts so application startup and builds do not need Google Fonts access.

@@ -74,6 +74,7 @@ export function createProspect(
     intelligence: structuredClone(blankIntelligence),
     callPrep: null,
     calls: [],
+    brief: null,
     outreachActivities: [],
     lastOutreachAt: null,
     nextFollowUpDate: null,

@@ -1,3 +1,9 @@
+import type { SalesAsset, SalesAssetFields } from "@/types/sales-asset";
+import type { BriefFields } from "@/types/opportunity-brief";
+import { briefOverrides } from "@/features/briefs/domain/brief";
+import { seedSalesAssets } from "@/data/seed-sales-assets";
+import { isExampleUrl } from "@/features/sales-assets/domain/assets";
+import { briefFieldsSchema, salesAssetFieldsSchema } from "./workspace-schema";
 import type { OutreachMessage } from "@/types/outreach";
 import { applyOutreach } from "@/features/outreach/domain/activity";
 import { dateOnly, outreachMessageSchema } from "./workspace-schema";
@@ -23,11 +29,13 @@ export const STORAGE_KEY = "sekairos.revenue-command.v1";
 interface StoreSnapshot {
   ready: boolean;
   prospects: Prospect[];
+  assets: SalesAsset[];
   error: string | null;
 }
 const serverSnapshot: StoreSnapshot = {
   ready: false,
   prospects: [],
+  assets: [],
   error: null,
 };
 let snapshot = serverSnapshot;
@@ -51,15 +59,21 @@ export function initializeStore() {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     const workspace: Workspace =
       raw === null
-        ? { version: 2, prospects: seedProspects() }
+        ? { version: 3, prospects: seedProspects(), assets: seedSalesAssets() }
         : parseWorkspace(raw);
-    if (raw === null || JSON.parse(raw).version === 1)
+    if (raw === null || JSON.parse(raw).version !== 3)
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace));
-    snapshot = { ready: true, prospects: workspace.prospects, error: null };
+    snapshot = {
+      ready: true,
+      prospects: workspace.prospects,
+      assets: workspace.assets,
+      error: null,
+    };
   } catch {
     snapshot = {
       ready: true,
       prospects: [],
+      assets: [],
       error:
         "Your local workspace could not be opened. Storage may be blocked or the saved data may be invalid. Existing data has not been replaced.",
     };
@@ -70,22 +84,23 @@ export function refreshStore() {
   initialized = false;
   initializeStore();
 }
-function change(transform: (prospects: Prospect[]) => Prospect[]) {
+function changeWorkspace(transform: (workspace: Workspace) => Workspace) {
   if (!snapshot.ready || snapshot.error)
     throw new Error(snapshot.error || "Workspace is still loading");
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    const current =
+    const current: Workspace =
       raw === null
-        ? { version: 2 as const, prospects: snapshot.prospects }
+        ? { version: 3, prospects: snapshot.prospects, assets: snapshot.assets }
         : parseWorkspace(raw);
-    const next: Workspace = {
-      version: 2,
-      prospects: transform(current.prospects),
-    };
-    parseWorkspace(JSON.stringify(next));
+    const next = parseWorkspace(JSON.stringify(transform(current)));
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    snapshot = { ready: true, prospects: next.prospects, error: null };
+    snapshot = {
+      ready: true,
+      prospects: next.prospects,
+      assets: next.assets,
+      error: null,
+    };
     emit();
   } catch (error) {
     throw new Error(
@@ -94,6 +109,12 @@ function change(transform: (prospects: Prospect[]) => Prospect[]) {
         : "Changes were not saved. Check browser storage.",
     );
   }
+}
+function change(transform: (prospects: Prospect[]) => Prospect[]) {
+  changeWorkspace((workspace) => ({
+    ...workspace,
+    prospects: transform(workspace.prospects),
+  }));
 }
 export function addProspect(fields: ProspectFields): string {
   const valid = prospectFieldsSchema.parse(fields);
@@ -181,6 +202,70 @@ export function saveFollowUp(id: string, date: string, reason: string) {
     ...p,
     nextFollowUpDate: valid,
     followUpReason: valid ? reason.trim() : "",
+    updatedAt: new Date().toISOString(),
+  }));
+}
+
+export function addSalesAsset(fields: SalesAssetFields): string {
+  const valid = salesAssetFieldsSchema.parse(fields),
+    id = crypto.randomUUID(),
+    now = new Date().toISOString();
+  changeWorkspace((w) => ({
+    ...w,
+    assets: [
+      ...w.assets,
+      {
+        ...valid,
+        id,
+        createdAt: now,
+        updatedAt: now,
+        isExample: isExampleUrl(valid.url),
+      },
+    ],
+  }));
+  return id;
+}
+export function updateSalesAsset(id: string, fields: SalesAssetFields) {
+  const valid = salesAssetFieldsSchema.parse(fields);
+  changeWorkspace((w) => {
+    if (!w.assets.some((a) => a.id === id))
+      throw new Error("Sales asset no longer exists");
+    return {
+      ...w,
+      assets: w.assets.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              ...valid,
+              isExample: isExampleUrl(valid.url),
+              updatedAt: new Date().toISOString(),
+            }
+          : a,
+      ),
+    };
+  });
+}
+export function deleteSalesAsset(id: string) {
+  changeWorkspace((w) => ({
+    ...w,
+    assets: w.assets.filter((a) => a.id !== id),
+  }));
+}
+export function saveOpportunityBrief(id: string, fields: BriefFields) {
+  const valid = briefFieldsSchema.parse(fields);
+  update(id, (p) => ({
+    ...p,
+    brief: {
+      overrides: briefOverrides(p, valid),
+      updatedAt: new Date().toISOString(),
+    },
+    updatedAt: new Date().toISOString(),
+  }));
+}
+export function resetOpportunityBrief(id: string) {
+  update(id, (p) => ({
+    ...p,
+    brief: null,
     updatedAt: new Date().toISOString(),
   }));
 }

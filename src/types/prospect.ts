@@ -1,3 +1,5 @@
+import type { SalesAsset } from "./sales-asset";
+import type { BriefCustomization } from "./opportunity-brief";
 import type { OutreachActivity } from "./outreach";
 export const ICP_VALUES = [
   "Founder / Local Business",
@@ -111,12 +113,14 @@ export interface Prospect extends ProspectFields {
   intelligence: Intelligence;
   callPrep: CallPrep | null;
   calls: CallDebrief[];
+  brief: BriefCustomization | null;
   outreachActivities: OutreachActivity[];
   lastOutreachAt: string | null;
   nextFollowUpDate: string | null;
   followUpReason: string;
 }
 export interface Workspace {
-  version: 2;
+  version: 3;
   prospects: Prospect[];
+  assets: SalesAsset[];
 }

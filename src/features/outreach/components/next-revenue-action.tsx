@@ -1,13 +1,20 @@
 "use client";
 import Link from "next/link";
 import { ArrowUpRight, Copy, Check } from "lucide-react";
+import type { SalesAsset } from "@/types/sales-asset";
 import type { Prospect } from "@/types/prospect";
 import { Button } from "@/components/ui/button";
 import { SaveFeedback } from "@/components/forms/fields";
 import { generateOutreachPack } from "../domain/messages";
 import { useOutreachActions } from "../use-outreach-actions";
-export function NextRevenueAction({ prospect: p }: { prospect: Prospect }) {
-  const pack = generateOutreachPack(p);
+export function NextRevenueAction({
+  prospect: p,
+  assets = [],
+}: {
+  prospect: Prospect;
+  assets?: SalesAsset[];
+}) {
+  const pack = generateOutreachPack(p, assets);
   const actions = useOutreachActions(p);
   return (
     <section

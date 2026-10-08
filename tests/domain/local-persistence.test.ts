@@ -168,7 +168,7 @@ test("Outreach drafts, preparation, sent activity and explicit follow-up survive
   );
 });
 
-test("Legacy store migration persists version two and preserves the original when migration writes fail", () => {
+test("Legacy store migration persists version three and preserves the original when migration writes fail", () => {
   const source = new MemoryStorage();
   open(source);
   const old = JSON.parse(source.getItem(STORAGE_KEY)!);
@@ -183,7 +183,7 @@ test("Legacy store migration persists version two and preserves the original whe
   const storage = new MemoryStorage();
   storage.setItem(STORAGE_KEY, raw);
   open(storage);
-  assert.equal(JSON.parse(storage.getItem(STORAGE_KEY)!).version, 2);
+  assert.equal(JSON.parse(storage.getItem(STORAGE_KEY)!).version, 3);
   assert.equal(getSnapshot().prospects.length, 3);
   assert.equal(
     getSnapshot().prospects[1].companyName,
@@ -199,4 +199,101 @@ test("Legacy store migration persists version two and preserves the original whe
   open(blocked);
   assert.ok(getSnapshot().error);
   assert.equal(blocked.getItem(STORAGE_KEY), raw);
+});
+
+test("Sales asset CRUD and brief customizations persist without replacing prospects or sent activity", async () => {
+  const {
+    addSalesAsset,
+    updateSalesAsset,
+    deleteSalesAsset,
+    saveOpportunityBrief,
+    resetOpportunityBrief,
+  } = await import("@/services/prospect-store");
+  const { generateOpportunityBrief, resolveOpportunityBrief } =
+    await import("@/features/briefs/domain/brief");
+  const storage = new MemoryStorage();
+  open(storage);
+  const id = addSalesAsset({
+    name: "Operator enrollment demo",
+    type: "Demo",
+    icp: "Soccer Club / Academy",
+    offer: "Player Enrollment System",
+    url: "https://sekairos.com/demo",
+    description: "Recorded demo",
+    useWhen: "Enrollment",
+    status: "Active",
+  });
+  const p = getSnapshot().prospects[1];
+  const fields = {
+    ...generateOpportunityBrief(p),
+    vision: "Saved executive vision",
+  };
+  saveOpportunityBrief(p.id, fields);
+  open(storage);
+  assert.equal(
+    resolveOpportunityBrief(getSnapshot().prospects[1]).vision,
+    "Saved executive vision",
+  );
+  assert.deepEqual(getSnapshot().prospects[1].brief?.overrides, {
+    vision: "Saved executive vision",
+  });
+  const asset = getSnapshot().assets.find((a) => a.id === id)!;
+  assert.equal(asset.isExample, false);
+  assert.ok(asset.createdAt);
+  updateSalesAsset(id, {
+    ...asset,
+    name: "Edited demo",
+    url: "https://example.com/placeholder",
+    status: "Inactive",
+  });
+  open(storage);
+  assert.equal(
+    getSnapshot().assets.find((a) => a.id === id)?.name,
+    "Edited demo",
+  );
+  assert.equal(getSnapshot().assets.find((a) => a.id === id)?.isExample, true);
+  resetOpportunityBrief(p.id);
+  deleteSalesAsset(id);
+  open(storage);
+  assert.equal(getSnapshot().prospects[1].brief, null);
+  assert.equal(
+    getSnapshot().assets.some((a) => a.id === id),
+    false,
+  );
+  assert.equal(getSnapshot().prospects.length, 3);
+  for (const a of getSnapshot().assets) deleteSalesAsset(a.id);
+  open(storage);
+  assert.equal(getSnapshot().assets.length, 0);
+});
+
+test("Asset and brief save failures preserve both saved data and the visible workspace snapshot", async () => {
+  const { addSalesAsset, saveOpportunityBrief } =
+    await import("@/services/prospect-store");
+  const { generateOpportunityBrief } =
+    await import("@/features/briefs/domain/brief");
+  const { blankAsset } = await import("@/features/sales-assets/domain/assets");
+  const storage = new MemoryStorage();
+  open(storage);
+  const before = getSnapshot(),
+    raw = storage.getItem(STORAGE_KEY);
+  storage.failWrites = true;
+  assert.throws(
+    () =>
+      addSalesAsset({
+        ...blankAsset,
+        name: "Must not save",
+        url: "https://sekairos.com/demo",
+      }),
+    /not saved/,
+  );
+  assert.throws(
+    () =>
+      saveOpportunityBrief(before.prospects[0].id, {
+        ...generateOpportunityBrief(before.prospects[0]),
+        vision: "Unsaved edit",
+      }),
+    /not saved/,
+  );
+  assert.equal(getSnapshot(), before);
+  assert.equal(storage.getItem(STORAGE_KEY), raw);
 });

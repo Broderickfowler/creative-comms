@@ -1,5 +1,11 @@
 import { MESSAGE_TYPES, OUTREACH_CHANNELS } from "@/types/outreach";
 import { z } from "zod";
+import { ASSET_TYPES, ASSET_ICPS, ASSET_STATUSES } from "@/types/sales-asset";
+import {
+  validAssetUrl,
+  isExampleUrl,
+} from "@/features/sales-assets/domain/assets";
+import { seedSalesAssets } from "@/data/seed-sales-assets";
 import {
   ICP_VALUES,
   PROSPECT_STATUSES,
@@ -19,6 +25,48 @@ export const dateOnly = text.refine(
       new Date(`${value}T12:00:00Z`).toISOString().slice(0, 10) === value),
   "Invalid follow-up date",
 );
+export const salesAssetFieldsSchema = z.object({
+  name: text.trim().min(1, "Asset name is required"),
+  type: z.enum(ASSET_TYPES),
+  icp: z.enum(ASSET_ICPS),
+  offer: text.trim(),
+  url: text
+    .trim()
+    .refine(
+      validAssetUrl,
+      "Use a valid http:// or https:// URL without credentials or spaces",
+    ),
+  description: text.trim(),
+  useWhen: text.trim(),
+  status: z.enum(ASSET_STATUSES),
+});
+const salesAssetSchema = salesAssetFieldsSchema
+  .extend({
+    id: text.min(1),
+    isExample: boolean.default(false),
+    createdAt: date,
+    updatedAt: date,
+  })
+  .transform((a) => ({ ...a, isExample: isExampleUrl(a.url) }));
+export const briefFieldsSchema = z.object({
+  company: text.trim().min(1, "Company is required"),
+  contact: text,
+  industry: text,
+  date: dateOnly.refine((v) => !!v, "Choose a date"),
+  desiredOutcome: text,
+  vision: text,
+  moneyInMotion: text,
+  executionFriction: text,
+  whyNow: text,
+  sekairosOpportunity: text,
+  recommendedFirstMove: text,
+  potentialBusinessImpact: text,
+  verificationNeeded: text,
+});
+const briefSchema = z.object({
+  overrides: briefFieldsSchema.partial(),
+  updatedAt: date,
+});
 const bounded = (max: number) => z.number().int().min(0).max(max);
 export const intelligenceSchema = z.object({
   desiredOutcome: text,
@@ -125,6 +173,7 @@ const prospectSchema = prospectFieldsSchema.extend({
   isFictional: boolean,
   intelligence: intelligenceSchema,
   callPrep: callPrepSchema.nullable(),
+  brief: briefSchema.nullable().default(null),
   outreachActivities: z.array(outreachActivitySchema).default([]),
   lastOutreachAt: date.nullable().default(null),
   nextFollowUpDate: dateOnly.nullable().default(null),
@@ -150,16 +199,26 @@ const checkedProspectSchema = prospectSchema.refine(
   "Invalid outreach activity ownership or duplicate ids",
 );
 const workspaceSchema = z
-  .object({
-    version: z.union([z.literal(1), z.literal(2)]),
-    prospects: z.array(checkedProspectSchema),
-  })
+  .union([
+    z.object({
+      version: z.union([z.literal(1), z.literal(2)]),
+      prospects: z.array(checkedProspectSchema),
+      assets: z.array(salesAssetSchema).default(() => seedSalesAssets()),
+    }),
+    z.object({
+      version: z.literal(3),
+      prospects: z.array(checkedProspectSchema),
+      assets: z.array(salesAssetSchema),
+    }),
+  ])
   .refine(
     (value) =>
-      new Set(value.prospects.map((p) => p.id)).size === value.prospects.length,
-    "Duplicate prospect ids",
+      new Set(value.prospects.map((p) => p.id)).size ===
+        value.prospects.length &&
+      new Set(value.assets.map((a) => a.id)).size === value.assets.length,
+    "Duplicate prospect or asset ids",
   );
 export function parseWorkspace(raw: string): Workspace {
   const parsed = workspaceSchema.parse(JSON.parse(raw));
-  return { ...parsed, version: 2 };
+  return { ...parsed, version: 3 };
 }

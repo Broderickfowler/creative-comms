@@ -87,6 +87,24 @@ After the primary email is marked sent, the pack advances to follow-up copy. A f
 
 Next Follow-Up Date and Follow-Up Reason are editable. Mark Sent defaults an unscheduled follow-up to the next local calendar day and keeps an existing date/reason. Clearing the date explicitly removes the scheduled follow-up, including any older call-date fallback. Command shows due/overdue follow-ups above score-ranked priorities, oldest first, and counts open priorities, due follow-ups, Demo Requests, Meeting Requests (including Meeting Booked), and Proposals from the saved local records.
 
+### Opportunity Briefs and Sales Assets
+
+The third slice connects PROSPECT INTELLIGENCE → OPPORTUNITY BRIEF → SALES ASSET MATCHING → SEND-READY COLLATERAL. The operator should be able to prepare prospect-specific material in under 60 seconds after an information or demo request.
+
+Sales Assets are URL-based, local records with name, type, ICP, offer, description, use-when context, status, and timestamps. Types are Demo, Website, Case Study, PDF, Video, Offer, Proposal Example, and Other. ICPs include the three product ICPs plus Universal. Only Active assets matching the prospect's ICP or Universal are eligible. All eleven seeded assets are labeled examples and use reserved example URLs; replace those URLs with real material before sending. Inactive or deleted assets no longer match. Deleting every asset does not reseed the library.
+
+Matching is deterministic. Exact ICP, exact recommended offer, desired outcome/opportunity keyword overlap, and the current demo/information/proposal request contribute to ranking. Matching returns primary material, optional secondary material, and a reason. Demo requests prefer demos; email requests prefer information collateral; proposal requests prefer proposal examples. Exact offer fit remains important. Ties break by asset name and id. No external content is retrieved and no performance or case-study results are invented.
+
+Every prospect has a generated Opportunity Brief at `/prospects/[id]/brief`, with Company, Contact, Industry, Date, DESIRED OUTCOME, VISION, MONEY IN MOTION, EXECUTION FRICTION, WHY NOW, SEKAIROS OPPORTUNITY, RECOMMENDED FIRST MOVE, POTENTIAL BUSINESS IMPACT, VERIFICATION NEEDED, OPPORTUNITY SCORE/classification, and a matched asset. Generated signals come directly from saved intelligence. Generated business impact is **Requires discovery.**; estimated opportunity value never becomes invented ROI. The operator can replace that text with recorded information.
+
+Brief edits save only customized field overrides, separate from generated defaults and underlying intelligence. Unmodified fields follow prospect intelligence; overrides remain through refresh until edited or reset. Reset removes overrides. Score and asset matching always use the actual prospect and current library, not customized brief wording. Printing shows the saved document rather than unsaved editor input.
+
+Print / Save as PDF uses the browser's print dialog. The standard brief fits one A4 page; long custom text flows to additional pages without clipping. Navigation, application shell controls, editing forms, and internal action buttons disappear in print. Fictional-prospect and example-asset labels remain visible. Asset URLs remain readable and clickable. Save the brief as a PDF and attach it in the chosen channel; the browser-local brief URL is an operator reference, not shared hosted collateral.
+
+Outreach shows RECOMMENDED MATERIAL, its name/link, Copy Asset Link, a secondary asset, Open Opportunity Brief, and Print / Save PDF. Add Asset Link inserts material into editable message copy without overwriting edits or repeating a URL. Nothing is sent automatically. NEXT REVENUE ACTION becomes Send Demo + Opportunity Brief when a demo request has matched material, Send Information Pack for an information request, and Prepare Proposal for a proposal request. Existing stored call recommendations remain intact.
+
+Command's MATERIAL TO SEND queue shows open prospects with demo, email, or proposal requests and no relevant Sent activity in the current call context. Draft/Prepared activity and unrelated voicemail do not clear the queue. A relevant email or messaging-channel send clears it; a new call request reopens it even if an earlier call's material was sent. A proposal acknowledgment leaves the prospect in Proposal; clearing this outreach queue does not mean a proposal was created or a deal completed. Ordinary priorities and follow-up counts continue to use the existing rules.
+
 ### Scope boundaries
 
 This slice has local persistence, not an external database. No CRM, email delivery, AI API, payments, automated outreach, authentication, cross-device sync, or unrelated feature is included. Estimated opportunity values are USD hypotheses, not confirmed revenue. Fictional seeds remain visibly labeled. Browser storage is not a backup or a production access-control system.

@@ -12,7 +12,7 @@ export function CallDebriefPage({ id }: { id: string }) {
       {p ? (
         <>
           <ProspectHeading prospect={p} title="Call Debrief" />
-          <DebriefForm key={id} prospect={p} />
+          <DebriefForm key={id} prospect={p} assets={store.assets} />
         </>
       ) : (
         <MissingProspect />

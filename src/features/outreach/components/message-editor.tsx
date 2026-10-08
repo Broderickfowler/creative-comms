@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { Copy, RotateCcw } from "lucide-react";
+import type { SalesAsset } from "@/types/sales-asset";
+import { appendAssetLink } from "@/features/sales-assets/domain/assets";
 import type { Prospect } from "@/types/prospect";
 import type { OutreachMessage } from "@/types/outreach";
 import { Button } from "@/components/ui/button";
@@ -12,9 +14,11 @@ import { useOutreachActions } from "../use-outreach-actions";
 export function MessageEditor({
   prospect: p,
   generated,
+  asset,
 }: {
   prospect: Prospect;
   generated: OutreachMessage;
+  asset?: SalesAsset | null;
 }) {
   const persisted = resolveMessage(p, generated.messageType);
   const [unsaved, setUnsaved] = useState<OutreachMessage | null>(null);
@@ -65,6 +69,21 @@ export function MessageEditor({
         onChange={(messageBody) => edit({ ...draft, messageBody })}
       />
       <div className="flex flex-wrap gap-2">
+        {asset && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              edit({
+                ...draft,
+                messageBody: appendAssetLink(draft.messageBody, asset),
+              })
+            }
+          >
+            Add Asset Link
+          </Button>
+        )}
         <Button
           type="button"
           size="sm"

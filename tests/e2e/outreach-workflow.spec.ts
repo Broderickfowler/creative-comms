@@ -42,7 +42,7 @@ test("Soccer demo → edit → refresh → real clipboard → Sent → due follo
   await expect(page.getByTestId("debrief-status")).toHaveText("Demo Requested");
   await expect(page.getByTestId("debrief-next-action")).toHaveText("Send Demo");
   await expect(page.getByTestId("revenue-action-label")).toHaveText(
-    "SEND DEMO",
+    "Send Demo + Opportunity Brief",
   );
   await page.getByRole("link", { name: "Open Send Pack", exact: true }).click();
   await expect(

@@ -1,3 +1,5 @@
+import type { SalesAsset } from "@/types/sales-asset";
+import { matchSalesAssets } from "@/features/sales-assets/domain/matching";
 import type { Prospect } from "@/types/prospect";
 import type {
   MessageType,
@@ -84,7 +86,10 @@ function outcome(p: Prospect): {
   }
   return { kind, primaryEmail, cta, action };
 }
-export function generateOutreachPack(p: Prospect): OutreachPack {
+export function generateOutreachPack(
+  p: Prospect,
+  assets: SalesAsset[] = [],
+): OutreachPack {
   const offer = recommendedOffer(p);
   const base = outcome(p);
   const demo =
@@ -252,13 +257,15 @@ export function generateOutreachPack(p: Prospect): OutreachPack {
       base.kind === "Follow-Up Pack"
         ? "FOLLOW UP"
         : base.kind === "Demo Send Pack"
-          ? "SEND DEMO"
+          ? matchSalesAssets(p, assets).primary
+            ? "Send Demo + Opportunity Brief"
+            : "SEND DEMO"
           : base.kind === "Information Send Pack"
-            ? "SEND INFORMATION"
+            ? "Send Information Pack"
             : base.kind === "Scheduling Response"
               ? "PREPARE SCHEDULING RESPONSE"
               : base.kind === "Proposal Acknowledgment"
-                ? "ACKNOWLEDGE PROPOSAL REQUEST"
+                ? "Prepare Proposal"
                 : base.action.toUpperCase(),
     offer,
     recommendedDemo: demo,
